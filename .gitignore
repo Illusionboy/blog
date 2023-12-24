@@ -1,0 +1,6 @@
+assets/
+templates/
+config.yaml
+
+*_test.go
+
