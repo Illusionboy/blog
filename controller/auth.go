@@ -18,6 +18,7 @@ type Accounts map[string][]byte
 var (
 	adminAccounts = Accounts{}
 	userAccounts  = Accounts{}
+	RevokedTokens = make(map[string]bool) // 使用撤销列表实现 Token 失效
 )
 
 // <==================================================登录处理相关函数=================================================>
@@ -103,6 +104,42 @@ func authenticateUser(username string, password []byte, accounts Accounts) bool 
 	}
 	//fmt.Println("Wrong Username")
 	return false
+}
+
+func ChangePasswd(c *gin.Context) {
+	userList := make([]models.User, 2)
+	userService := service.UserService{}
+	userList = userService.GetUserList()
+
+	// 遍历结构体切片并构建 map
+	for _, user := range userList {
+		// 使用结构体中的 Name 作为键，Email 作为值
+		userAccounts[user.Username] = user.Password
+	}
+
+	username := c.PostForm("username")
+	password := utils.EncryptPassword(c.PostForm("password"))
+	// fetch user from accounts.
+	for usr, _ := range userAccounts {
+		//fmt.Printf("Check %s\n", usr)
+		if usr == username {
+			//fmt.Printf("Found %s\n", usr)
+			user := models.User{
+				Username: usr,
+				Password: password,
+			}
+			userService.UpdateUser(user)
+			tokenString, err := c.Cookie("jwtToken")
+			if err != nil {
+				utils.RespondWithError(401, "jwtToken err", c)
+			}
+			// 将旧 Token 添加到撤销列表中
+			RevokedTokens[tokenString] = true
+			c.Redirect(http.StatusMovedPermanently, "/login")
+			return
+		}
+	}
+	utils.RespondWithError(401, "Username Doesn't Exists", c)
 }
 
 // <==================================================JWT处理相关函数=================================================>

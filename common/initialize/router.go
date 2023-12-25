@@ -48,6 +48,9 @@ func Router() {
 	{
 		// index
 		web.GET("/", controller.AdminIndex)
+		// 修改密码
+		web.GET("chpasswd", controller.GoLogin)
+		web.POST("chpasswd", controller.ChangePasswd)
 	}
 
 	{

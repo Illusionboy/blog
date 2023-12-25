@@ -12,7 +12,8 @@ func AuthMiddleware() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		// cookie验证jwtToken
 		tokenString, err := c.Cookie("jwtToken")
-		if err != nil {
+		// 获取token错误或token失效
+		if err != nil || controller.RevokedTokens[tokenString] {
 			fmt.Println("BadReq")
 			//utils.RespondWithError(401, "Unauthorized", c)
 			c.Redirect(http.StatusTemporaryRedirect, "/login")
