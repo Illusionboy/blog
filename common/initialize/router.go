@@ -29,7 +29,7 @@ func Router() {
 	// 上方展示channel，下方展示Post
 	engine.GET("/", controller.Index)
 	engine.GET("/login", controller.GoLogin)
-	engine.POST("/login", controller.AuthLogin())
+	engine.POST("/login", controller.AuthLogin)
 	engine.GET("/post/:id", controller.PostDetail)
 	// 添加channel路由
 	engine.GET("/channel/:slug", controller.ChannelView)
@@ -51,6 +51,8 @@ func Router() {
 		// 修改密码
 		web.GET("chpasswd", controller.GoLogin)
 		web.POST("chpasswd", controller.ChangePasswd)
+		// 退出登录
+		web.GET("logout", controller.LogOut)
 	}
 
 	{
